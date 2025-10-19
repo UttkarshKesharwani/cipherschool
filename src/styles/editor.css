@@ -1,0 +1,39 @@
+/* Editor styles */
+.editor-area {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+}
+.code-editor {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: var(--card);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.code-editor .editor-header {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.code-editor textarea {
+  flex: 1;
+  min-height: 200px;
+  background: rgba(10, 12, 18, 0.6);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono",
+    "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  caret-color: var(--accent);
+}
+.no-file {
+  margin: auto;
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
