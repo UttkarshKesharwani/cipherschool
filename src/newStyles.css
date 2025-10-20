@@ -1,0 +1,129 @@
+/* Root layout */
+.app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: "Inter", "Segoe UI", sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Themes */
+:root {
+  --bg: #0f111a;
+  --bg-light: #ffffff;
+  --sidebar-bg: #1a1c24;
+  --sidebar-border: #2a2d38;
+  --text: #f8f8f8;
+  --border: #2c2f3a;
+  --hover: #2f3241;
+  --accent: #00aaff;
+}
+
+[data-theme="light"] {
+  --bg: #f9f9f9;
+  --text: #111;
+  --sidebar-bg: #ffffff;
+  --border: #ddd;
+  --hover: #f0f0f0;
+  --accent: #0077cc;
+}
+
+/* Workspace */
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.file-explorer {
+  width: 240px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  padding: 0.75rem;
+  overflow-y: auto;
+  transition: width 0.3s ease;
+}
+
+/* Editor + Preview Container */
+.editor-preview {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  background: var(--bg);
+  transition: all 0.3s ease;
+}
+
+/* Equal Split */
+.editor-container,
+.preview-container {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  border-left: 1px solid var(--border);
+}
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #14161f;
+}
+
+.preview-container {
+  background-color: #11131a;
+}
+
+/* Sandpack Layout */
+.preview-layout {
+  height: 100%;
+  border-left: 1px solid var(--border);
+}
+
+/* No File Selected */
+.no-file {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #aaa;
+  font-size: 1.1rem;
+  font-style: italic;
+  background: #14161f;
+}
+
+/* Scrollbars */
+.file-explorer::-webkit-scrollbar {
+  width: 6px;
+}
+.file-explorer::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 4px;
+}
+
+/* Smooth transitions */
+.editor-container,
+.preview-container,
+.file-explorer {
+  transition: all 0.3s ease;
+}
+
+/* Hover & Active States for FileExplorer items (optional) */
+.file-item:hover {
+  background: var(--hover);
+  cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1000px) {
+  .editor-preview {
+    flex-direction: column;
+  }
+
+  .editor-container,
+  .preview-container {
+    height: 50%;
+    width: 100%;
+  }
+}

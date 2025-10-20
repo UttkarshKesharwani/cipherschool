@@ -1,6 +1,8 @@
-/* File Explorer styles */
+
+
+
+
 .file-explorer {
-  width: 260px;
   background: var(--bg);
   border-right: 1px solid var(--border);
   overflow-y: auto;

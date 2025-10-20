@@ -8,8 +8,9 @@ import {
 
 import FileExplorer from "./components/FileExplorer";
 import TopBar from "./components/TopBar";
+// Use SandpackCodeEditor instead of the local custom editor for full editor features
 import useProject from "./hooks/useProject";
-import "./newStyles.css";
+// import "./styles.css";
 
 export default function App() {
   const project = useProject("default");
@@ -32,12 +33,13 @@ export default function App() {
 
   const [theme, setTheme] = useState("dark");
 
+  console.log(project);
+
+  // Handle theme toggle
   useEffect(() => {
-    if (theme === "light") {
+    if (theme === "light")
       document.documentElement.setAttribute("data-theme", "light");
-    } else {
-      document.documentElement.removeAttribute("data-theme");
-    }
+    else document.documentElement.removeAttribute("data-theme");
   }, [theme]);
 
   return (
@@ -86,12 +88,13 @@ export default function App() {
                   file={
                     activePath.startsWith("/") ? activePath : `/${activePath}`
                   }
-                  showTabs
-                  showLineNumbers
-                  showInlineErrors
+                  showTabs={true}
+                  showLineNumbers={true}
+                  showInlineErrors={true}
                   wrapContent={false}
                   onChange={(code) => updateFile(activePath, code)}
-                  style={{ height: "100%", width: "100%" }}
+                  style={{ height: "100%" , width: "100%"}}
+                  className="sp-editor"
                 />
               ) : (
                 <div className="no-file">Select a file to start coding ✨</div>
@@ -99,11 +102,17 @@ export default function App() {
             </div>
 
             <div className="preview-container">
-              <SandpackLayout className="preview-layout">
-                <SandpackPreview
-                  showOpenInCodeSandbox={false}
-                  style={{ height: "100%", width: "100%" }}
-                />
+              <SandpackLayout>
+                <SandpackLayout
+                  style={{ height: "100%" }}
+                  className="sp-layout"
+                >
+                  <SandpackPreview
+                    showOpenInCodeSandbox={false}
+                    style={{ height: "100%" }}
+                    className="sp-preview"
+                  />
+                </SandpackLayout>
               </SandpackLayout>
             </div>
           </main>
