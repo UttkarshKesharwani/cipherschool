@@ -65,15 +65,7 @@
   border-left: 1px solid var(--border);
 }
 
-.editor-container {
-  display: flex;
-  flex-direction: column;
-  background-color: #14161f;
-}
 
-.preview-container {
-  background-color: #11131a;
-}
 
 /* Sandpack Layout */
 .preview-layout {
@@ -82,7 +74,7 @@
 }
 
 /* No File Selected */
-.no-file {
+/* .no-file {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -91,11 +83,11 @@
   font-size: 1.1rem;
   font-style: italic;
   background: #14161f;
-}
+} */
 
 /* Scrollbars */
 .file-explorer::-webkit-scrollbar {
-  width: 6px;
+  /* width: 6px; */
 }
 .file-explorer::-webkit-scrollbar-thumb {
   background-color: #444;

@@ -3,11 +3,11 @@ import {
   SandpackProvider,
   SandpackLayout,
   SandpackPreview,
-  SandpackCodeEditor,
 } from "@codesandbox/sandpack-react";
 
 import FileExplorer from "./components/FileExplorer";
 import TopBar from "./components/TopBar";
+import MonacoEditor from "./components/MonacoEditor";
 import useProject from "./hooks/useProject";
 import "./newStyles.css";
 
@@ -58,9 +58,10 @@ export default function App() {
       />
 
       <SandpackProvider
-        template="react"
+        // template="react"
         files={sandpackFiles}
         customSetup={{
+          entry: "/src/index.jsx",
           dependencies: { react: "18.2.0", "react-dom": "18.2.0" },
         }}
       >
@@ -81,21 +82,12 @@ export default function App() {
           {/* 🧠 Code Editor + ⚡ Preview side-by-side */}
           <main className="editor-preview">
             <div className="editor-container">
-              {activePath ? (
-                <SandpackCodeEditor
-                  file={
-                    activePath.startsWith("/") ? activePath : `/${activePath}`
-                  }
-                  showTabs
-                  showLineNumbers
-                  showInlineErrors
-                  wrapContent={false}
-                  onChange={(code) => updateFile(activePath, code)}
-                  style={{ height: "100%", width: "100%" }}
-                />
-              ) : (
-                <div className="no-file">Select a file to start coding ✨</div>
-              )}
+              <MonacoEditor
+                files={files}
+                activePath={activePath}
+                updateFile={updateFile}
+                theme={theme}
+              />
             </div>
 
             <div className="preview-container">
@@ -103,6 +95,8 @@ export default function App() {
                 <SandpackPreview
                   showOpenInCodeSandbox={false}
                   style={{ height: "100%", width: "100%" }}
+                  showNavigator
+                  showRefreshButton
                 />
               </SandpackLayout>
             </div>

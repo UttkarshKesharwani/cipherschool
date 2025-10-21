@@ -34,9 +34,7 @@ function Icon({ isFile, open }) {
   if (isFile) return <span className="fe-icon file-spacer" />;
   // VS Code-like chevrons: closed ▶, open ▼
   return (
-    <span
-     className={`fe-icon chevron ${open ? "open" : "closed"}`}
-     >
+    <span className={`fe-icon chevron ${open ? "open" : "closed"}`}>
       {open ? "v" : ">"}
     </span>
   );
