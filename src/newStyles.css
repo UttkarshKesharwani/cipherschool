@@ -1,3 +1,6 @@
+/* Import auth styles */
+@import url("./styles/auth.css");
+
 /* Root layout */
 .app-root {
   display: flex;
@@ -7,6 +10,30 @@
   color: var(--text);
   font-family: "Inter", "Segoe UI", sans-serif;
   transition: background 0.3s, color 0.3s;
+}
+
+/* Error banner */
+.error-banner {
+  background-color: #ff4444;
+  color: white;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.error-banner button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.error-banner button:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Themes */

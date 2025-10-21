@@ -5,14 +5,15 @@ import {
   SandpackPreview,
 } from "@codesandbox/sandpack-react";
 
+import { AuthProvider } from "./contexts/AuthContext";
 import FileExplorer from "./components/FileExplorer";
 import TopBar from "./components/TopBar";
 import MonacoEditor from "./components/MonacoEditor";
-import useProject from "./hooks/useProject";
+import useProjectApi from "./hooks/useProjectApi";
 import "./newStyles.css";
 
-export default function App() {
-  const project = useProject("default");
+function AppContent() {
+  const project = useProjectApi("default");
   const {
     files,
     activePath,
@@ -27,7 +28,11 @@ export default function App() {
     setAutosave,
     saveProject,
     loadProject,
+    createProject,
     setActivePath,
+    isSaving,
+    isLoading,
+    error,
   } = project;
 
   const [theme, setTheme] = useState("dark");
@@ -40,25 +45,69 @@ export default function App() {
     }
   }, [theme]);
 
+  const handleCreateProject = async (name, description = "") => {
+    try {
+      const newProject = await createProject(name, description);
+      console.log("Project created:", newProject);
+    } catch (err) {
+      alert("Failed to create project: " + err.message);
+    }
+  };
+
+  const handleAddFile = () => {
+    const path = prompt("Enter new file path", "/src/NewFile.jsx");
+    if (path) {
+      try {
+        createFile(path);
+      } catch (err) {
+        alert("Failed to create file: " + err.message);
+      }
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      await saveProject();
+      console.log("Project saved successfully");
+    } catch (err) {
+      alert("Failed to save project: " + err.message);
+    }
+  };
+
+  const handleLoad = async () => {
+    try {
+      await loadProject();
+      console.log("Project loaded successfully");
+    } catch (err) {
+      alert("Failed to load project: " + err.message);
+    }
+  };
+
   return (
     <div className={`app-root ${theme}`}>
+      {error && (
+        <div className="error-banner">
+          {error}
+          <button onClick={() => window.location.reload()}>Reload</button>
+        </div>
+      )}
+
       <TopBar
         projectId={projectId}
         setProjectId={setProjectId}
-        onSave={saveProject}
-        onLoad={loadProject}
+        onSave={handleSave}
+        onLoad={handleLoad}
+        onCreateProject={handleCreateProject}
         autosave={autosave}
         setAutosave={setAutosave}
-        onAddFile={() => {
-          const n = prompt("Enter new file path", "/src/NewFile.jsx");
-          if (n) createFile(n);
-        }}
+        onAddFile={handleAddFile}
         theme={theme}
         setTheme={setTheme}
+        isSaving={isSaving}
+        isLoading={isLoading}
       />
 
       <SandpackProvider
-        // template="react"
         files={sandpackFiles}
         customSetup={{
           entry: "/src/index.jsx",
@@ -66,7 +115,7 @@ export default function App() {
         }}
       >
         <div className="workspace">
-          {/* 📁 File Explorer Sidebar */}
+          {/* File Explorer Sidebar */}
           <aside className="file-explorer">
             <FileExplorer
               files={files}
@@ -75,11 +124,11 @@ export default function App() {
               deleteFile={deleteFile}
               createFile={createFile}
               renameFile={renameFile}
-              onRefresh={loadProject}
+              onRefresh={handleLoad}
             />
           </aside>
 
-          {/* 🧠 Code Editor + ⚡ Preview side-by-side */}
+          {/* Code Editor + Preview side-by-side */}
           <main className="editor-preview">
             <div className="editor-container">
               <MonacoEditor
@@ -104,5 +153,13 @@ export default function App() {
         </div>
       </SandpackProvider>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
