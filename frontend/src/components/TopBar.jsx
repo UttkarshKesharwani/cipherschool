@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import AuthModal from "./AuthModal";
+import UserProfile from "./UserProfile";
 
 export default function TopBar({
   projectId,
@@ -21,6 +22,7 @@ export default function TopBar({
   const [authMode, setAuthMode] = useState("login");
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
 
   const handleLogin = () => {
     setAuthMode("login");
@@ -111,13 +113,19 @@ export default function TopBar({
                   </div>
                   <button
                     className="user-menu-item"
-                    onClick={() => setShowUserMenu(false)}
+                    onClick={() => {
+                      setShowUserProfile(true);
+                      setShowUserMenu(false);
+                    }}
                   >
                     Profile
                   </button>
                   <button
                     className="user-menu-item"
-                    onClick={() => setShowUserMenu(false)}
+                    onClick={() => {
+                      setShowUserProfile(true);
+                      setShowUserMenu(false);
+                    }}
                   >
                     Settings
                   </button>
@@ -150,6 +158,11 @@ export default function TopBar({
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         mode={authMode}
+      />
+
+      <UserProfile
+        isOpen={showUserProfile}
+        onClose={() => setShowUserProfile(false)}
       />
 
       {showNewProjectModal && (

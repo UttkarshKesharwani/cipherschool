@@ -120,6 +120,21 @@ export const authApi = {
   getStats: async () => {
     return await apiRequest("/users/stats");
   },
+
+  // Deactivate user account
+  deactivateAccount: async () => {
+    return await apiRequest("/users/deactivate", {
+      method: "PUT",
+    });
+  },
+
+  // Delete user account
+  deleteAccount: async (confirmData) => {
+    return await apiRequest("/users/account", {
+      method: "DELETE",
+      body: JSON.stringify(confirmData),
+    });
+  },
 };
 
 // Projects API functions

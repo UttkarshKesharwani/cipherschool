@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import "../styles/auth.css";
 
@@ -15,7 +15,20 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = "login" }) => {
   const [errors, setErrors] = useState({});
   const { login, register, isLoading, error, clearError } = useAuth();
 
+  // Sync internal mode state with prop when it changes
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
+  // Clear errors when modal opens - but only once per open
+  useEffect(() => {
+    if (isOpen) {
+      clearError();
+    }
+  }, [isOpen]);
+
   const handleClose = () => {
+    // Reset form data
     setFormData({
       username: "",
       email: "",
@@ -115,6 +128,19 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = "login" }) => {
     setMode(mode === "login" ? "register" : "login");
     setErrors({});
     clearError();
+    // Keep the email and password fields, only reset register-specific fields
+    if (mode === "login") {
+      // Switching to register, keep existing data
+    } else {
+      // Switching to login, clear register-specific fields
+      setFormData((prev) => ({
+        ...prev,
+        username: "",
+        firstName: "",
+        lastName: "",
+        confirmPassword: "",
+      }));
+    }
   };
 
   if (!isOpen) return null;

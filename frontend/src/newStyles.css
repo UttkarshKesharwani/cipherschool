@@ -14,7 +14,7 @@
 
 /* Error banner */
 .error-banner {
-  background-color: #ff4444;
+  background-color: #dc2626;
   color: white;
   padding: 12px;
   display: flex;
@@ -24,8 +24,8 @@
 }
 
 .error-banner button {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #b91c1c;
+  border: 1px solid #991b1b;
   color: white;
   padding: 4px 12px;
   border-radius: 4px;
@@ -33,7 +33,7 @@
 }
 
 .error-banner button:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #991b1b;
 }
 
 /* Themes */

@@ -5,37 +5,36 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
 }
 
 .auth-modal {
-  background: var(--bg-color);
-  border-radius: 12px;
+  background: var(--bg);
+  border-radius: 8px;
   padding: 0;
   width: 100%;
-  max-width: 420px;
-  max-height: 90vh;
+  max-width: 440px;
+  max-height: 95vh;
   overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
 }
 
 .auth-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 24px 0;
-  margin-bottom: 24px;
+  padding: 20px 24px 0;
+  margin-bottom: 20px;
 }
 
 .auth-modal h2 {
   margin: 0;
-  color: var(--text-color);
+  color: var(--text);
   font-size: 24px;
   font-weight: 600;
 }
@@ -45,7 +44,8 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: var(--text-muted);
+  color: var(--text);
+  opacity: 0.7;
   padding: 0;
   width: 32px;
   height: 32px;
@@ -57,16 +57,17 @@
 }
 
 .close-button:hover {
-  background-color: var(--hover-bg);
-  color: var(--text-color);
+  background-color: var(--hover);
+  color: var(--text);
+  opacity: 1;
 }
 
 .auth-form {
-  padding: 0 24px 24px;
+  padding: 0 24px 20px;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .form-row {
@@ -78,7 +79,7 @@
 .form-group label {
   display: block;
   margin-bottom: 6px;
-  color: var(--text-color);
+  color: var(--text);
   font-weight: 500;
   font-size: 14px;
 }
@@ -86,10 +87,10 @@
 .form-group input {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--input-bg);
-  color: var(--text-color);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--sidebar-bg);
+  color: var(--text);
   font-size: 14px;
   transition: all 0.2s ease;
   box-sizing: border-box;
@@ -97,8 +98,8 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: var(--accent-color);
-  background-color: var(--bg-color);
+  border-color: var(--accent);
+  background-color: var(--sidebar-bg);
 }
 
 .form-group input.error {
@@ -106,7 +107,8 @@
 }
 
 .form-group input::placeholder {
-  color: var(--text-muted);
+  color: var(--text);
+  opacity: 0.6;
 }
 
 .field-error {
@@ -117,32 +119,38 @@
 }
 
 .error-message {
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: 6px;
   margin-bottom: 20px;
   font-size: 14px;
+}
+
+[data-theme="dark"] .error-message {
+  background-color: #450a0a;
+  border: 1px solid #7f1d1d;
+  color: #fca5a5;
 }
 
 .auth-button {
   width: 100%;
   padding: 12px 24px;
-  background-color: var(--accent-color);
+  background-color: var(--accent);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .auth-button:hover:not(:disabled) {
-  background-color: var(--accent-hover);
-  transform: translateY(-1px);
+  background-color: #005ba3;
+  transform: none;
 }
 
 .auth-button:disabled {
@@ -153,34 +161,67 @@
 
 .auth-switch {
   text-align: center;
-  padding-top: 20px;
-  border-top: 1px solid var(--border-color);
-  color: var(--text-muted);
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  opacity: 0.8;
   font-size: 14px;
 }
 
 .link-button {
   background: none;
   border: none;
-  color: var(--accent-color);
+  color: var(--accent);
   cursor: pointer;
   font-weight: 600;
   text-decoration: underline;
 }
 
 .link-button:hover {
-  color: var(--accent-hover);
+  color: #005ba3;
 }
 
-/* Dark theme adjustments */
-[data-theme="dark"] .auth-modal {
-  --input-bg: rgba(255, 255, 255, 0.05);
+/* Responsive adjustments */
+@media (max-height: 700px) {
+  .auth-modal {
+    max-height: 98vh;
+  }
+
+  .auth-modal-header {
+    padding: 16px 24px 0;
+    margin-bottom: 16px;
+  }
+
+  .auth-form {
+    padding: 0 24px 16px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .auth-button {
+    margin-bottom: 14px;
+  }
+
+  .auth-switch {
+    padding-top: 14px;
+  }
 }
 
-/* Light theme adjustments */
-[data-theme="light"] .auth-modal {
-  --input-bg: rgba(0, 0, 0, 0.02);
+@media (max-height: 600px) {
+  .auth-modal {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .auth-modal-overlay {
+    align-items: flex-start;
+    padding: 0;
+  }
 }
+
+/* Theme consistency - using existing variables */
 
 /* User dropdown styles */
 .user-dropdown {
@@ -191,7 +232,7 @@
 .user-button {
   background: none;
   border: none;
-  color: var(--text-color);
+  color: var(--text);
   cursor: pointer;
   padding: 8px 12px;
   border-radius: 6px;
@@ -203,19 +244,19 @@
 }
 
 .user-button:hover {
-  background-color: var(--hover-bg);
+  background-color: var(--hover);
 }
 
 .user-menu {
   position: absolute;
   top: 100%;
   right: 0;
-  background: var(--bg-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
   padding: 8px 0;
   min-width: 200px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   z-index: 1001;
   margin-top: 4px;
 }
@@ -226,14 +267,14 @@
   border: none;
   padding: 12px 16px;
   text-align: left;
-  color: var(--text-color);
+  color: var(--text);
   cursor: pointer;
   transition: background-color 0.2s ease;
   font-size: 14px;
 }
 
 .user-menu-item:hover {
-  background-color: var(--hover-bg);
+  background-color: var(--hover);
 }
 
 .user-menu-item.danger {
@@ -241,23 +282,24 @@
 }
 
 .user-menu-item.danger:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: #450a0a;
 }
 
 .user-info {
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border);
   margin-bottom: 8px;
 }
 
 .user-name {
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--text);
   margin: 0 0 4px 0;
 }
 
 .user-email {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text);
+  opacity: 0.7;
   margin: 0;
 }

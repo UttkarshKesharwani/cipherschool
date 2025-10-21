@@ -1,0 +1,377 @@
+/* User Profile Modal Styles */
+.user-profile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.user-profile-modal {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 0;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+}
+
+.user-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.user-profile-header h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.user-profile-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--sidebar-bg);
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 12px 20px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-button:hover {
+  background: var(--hover);
+}
+
+.tab-button.active {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+}
+
+.user-profile-content {
+  padding: 24px;
+}
+
+/* Form Styles */
+.profile-form,
+.password-form {
+  max-width: 100%;
+}
+
+.user-info-display {
+  background: var(--sidebar-bg);
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.info-item:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+
+.info-item strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--sidebar-bg);
+  color: var(--text);
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.range-value {
+  margin-left: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+/* Button Styles */
+.profile-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 12px;
+  margin-bottom: 12px;
+}
+
+.profile-button.primary {
+  background-color: var(--accent);
+  color: white;
+}
+
+.profile-button.primary:hover:not(:disabled) {
+  background-color: #005ba3;
+}
+
+.profile-button.warning {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.profile-button.warning:hover:not(:disabled) {
+  background-color: #d97706;
+}
+
+.profile-button.danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.profile-button.danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.profile-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success/Error Messages */
+.success-message {
+  background-color: #dcfce7;
+  border: 1px solid #86efac;
+  color: #166534;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+[data-theme="dark"] .success-message {
+  background-color: #052e16;
+  border: 1px solid #166534;
+  color: #86efac;
+}
+
+.error-message {
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+[data-theme="dark"] .error-message {
+  background-color: #450a0a;
+  border: 1px solid #7f1d1d;
+  color: #fca5a5;
+}
+
+/* Statistics Styles */
+.stats-content {
+  min-height: 200px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--sidebar-bg);
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.recent-projects {
+  background: var(--sidebar-bg);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.recent-projects h3 {
+  margin: 0 0 16px 0;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.recent-projects ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-projects li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.recent-projects li:last-child {
+  border-bottom: none;
+}
+
+.project-name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.project-date {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+/* Settings/Danger Zone */
+.settings-content {
+  max-width: 100%;
+}
+
+.danger-zone {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.danger-zone h3 {
+  color: #ef4444;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+}
+
+.danger-zone p {
+  color: var(--text);
+  margin: 0 0 20px 0;
+  font-size: 14px;
+}
+
+.no-stats {
+  text-align: center;
+  padding: 40px;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .user-profile-modal {
+    max-width: 95vw;
+    margin: 20px;
+  }
+
+  .user-profile-tabs {
+    flex-wrap: wrap;
+  }
+
+  .tab-button {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
