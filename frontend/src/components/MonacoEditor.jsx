@@ -4,6 +4,15 @@ import Editor from "@monaco-editor/react";
 function MonacoEditor({ files, activePath, updateFile, theme }) {
   const editorRef = useRef(null);
 
+  // Debug logging
+  console.log("MonacoEditor render - activePath:", activePath);
+  console.log("MonacoEditor render - files keys:", Object.keys(files || {}));
+  console.log("MonacoEditor render - files[activePath]:", files[activePath]);
+  console.log(
+    "MonacoEditor render - files[activePath] length:",
+    files[activePath]?.length
+  );
+
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
 

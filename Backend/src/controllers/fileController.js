@@ -1,6 +1,5 @@
 const { File, Project } = require("../models");
 const { asyncHandler } = require("../middleware/errorHandler");
-const s3Service = require("../services/s3Service");
 
 // @desc    Create a new file or folder
 // @route   POST /api/files
@@ -54,49 +53,13 @@ const createFile = asyncHandler(async (req, res) => {
     });
   }
 
-  let s3Key = null;
-
-  // Upload file content to S3 if it's a file (not folder)
-  if (type === "file" && content) {
-    try {
-      s3Key = s3Service.generateS3Key(projectId, filePath, req.user._id);
-
-      // Determine MIME type based on file extension
-      const extension = name.split(".").pop().toLowerCase();
-      const mimeTypeMap = {
-        js: "application/javascript",
-        jsx: "application/javascript",
-        ts: "application/typescript",
-        tsx: "application/typescript",
-        css: "text/css",
-        scss: "text/scss",
-        sass: "text/sass",
-        html: "text/html",
-        json: "application/json",
-        md: "text/markdown",
-        txt: "text/plain",
-      };
-
-      const mimeType = mimeTypeMap[extension] || "text/plain";
-
-      await s3Service.uploadFileToS3(content, s3Key, mimeType);
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to upload file content to storage",
-        error: error.message,
-      });
-    }
-  }
-
-  // Create file record
+  // Create file record with content stored directly in MongoDB
   const file = await File.create({
     name,
     projectId,
     parentId: parentId || null,
     type,
     path: filePath,
-    s3Key,
     content: type === "file" ? content : "",
     language: language || "javascript",
   });
@@ -127,6 +90,7 @@ const createFile = asyncHandler(async (req, res) => {
 // @access  Private
 const getFileById = asyncHandler(async (req, res) => {
   const file = await File.findById(req.params.id).populate("projectId");
+  console.log("file is ", file);
 
   if (!file) {
     return res.status(404).json({
@@ -143,24 +107,8 @@ const getFileById = asyncHandler(async (req, res) => {
     });
   }
 
-  // If it's a file with S3 storage, get content from S3
-  let fileContent = file.content;
-  if (file.type === "file" && file.s3Key) {
-    try {
-      const s3Result = await s3Service.downloadFileFromS3(file.s3Key);
-      fileContent = s3Result.content;
-
-      // Update file metadata if needed
-      if (file.size !== s3Result.size) {
-        file.size = s3Result.size;
-        file.metadata.lastAccessed = new Date();
-        await file.save();
-      }
-    } catch (error) {
-      console.error("Error fetching file from S3:", error);
-      // Fall back to database content if S3 fails
-    }
-  }
+  // Get file content directly from database
+  const fileContent = file.content;
 
   res.status(200).json({
     success: true,
@@ -227,19 +175,6 @@ const updateFile = asyncHandler(async (req, res) => {
 
   // Handle content update for files
   if (content !== undefined && file.type === "file") {
-    // Upload new content to S3
-    if (file.s3Key) {
-      try {
-        await s3Service.uploadFileToS3(content, file.s3Key, file.mimeType);
-      } catch (error) {
-        return res.status(500).json({
-          success: false,
-          message: "Failed to update file content in storage",
-          error: error.message,
-        });
-      }
-    }
-
     file.content = content;
     file.metadata.version += 1;
   }
@@ -278,22 +213,7 @@ const updateFile = asyncHandler(async (req, res) => {
     file.path = newPath;
   }
 
-  // Update S3 key if path changed
-  if (file.type === "file" && file.s3Key && newPath !== oldPath) {
-    try {
-      const newS3Key = s3Service.generateS3Key(
-        file.projectId._id,
-        newPath,
-        req.user._id
-      );
-
-      await s3Service.moveFileInS3(file.s3Key, newS3Key);
-      file.s3Key = newS3Key;
-    } catch (error) {
-      console.error("Error moving file in S3:", error);
-      // Continue with database update even if S3 move fails
-    }
-  }
+  // Path updated - no additional storage operations needed since content is in MongoDB
 
   file.metadata.lastModified = new Date();
   await file.save();
@@ -338,42 +258,7 @@ const deleteFile = asyncHandler(async (req, res) => {
     });
   }
 
-  // Collect S3 keys to delete
-  const s3KeysToDelete = [];
-
-  if (file.type === "file" && file.s3Key) {
-    s3KeysToDelete.push(file.s3Key);
-  } else if (file.type === "folder") {
-    // Get all files in the folder recursively
-    const getAllFilesInFolder = async (folderId) => {
-      const children = await File.find({ parentId: folderId });
-      let allFiles = [];
-
-      for (const child of children) {
-        if (child.type === "file" && child.s3Key) {
-          allFiles.push(child.s3Key);
-        } else if (child.type === "folder") {
-          const subFiles = await getAllFilesInFolder(child._id);
-          allFiles = allFiles.concat(subFiles);
-        }
-      }
-
-      return allFiles;
-    };
-
-    const folderS3Keys = await getAllFilesInFolder(file._id);
-    s3KeysToDelete.push(...folderS3Keys);
-  }
-
-  // Delete from S3
-  if (s3KeysToDelete.length > 0) {
-    try {
-      await s3Service.deleteMultipleFilesFromS3(s3KeysToDelete);
-    } catch (error) {
-      console.error("Error deleting files from S3:", error);
-      // Continue with database deletion even if S3 deletion fails
-    }
-  }
+  // No external storage cleanup needed - content is stored in MongoDB
 
   // Delete from database (this will handle recursive deletion for folders)
   await file.deleteRecursively();
@@ -402,11 +287,14 @@ const deleteFile = asyncHandler(async (req, res) => {
 
 // @desc    Get project file tree
 // @route   GET /api/files/project/:projectId/tree
-// @access  Private
+// @access  Public (if project is public) / Private (if project is private)
 const getProjectFileTree = asyncHandler(async (req, res) => {
+  console.log("Getting file tree for project:", req.params.projectId);
+  console.log("User:", req.user?.email || "Anonymous");
+
   const { projectId } = req.params;
 
-  // Check if project exists and user owns it
+  // Check if project exists
   const project = await Project.findById(projectId);
   if (!project) {
     return res.status(404).json({
@@ -415,14 +303,26 @@ const getProjectFileTree = asyncHandler(async (req, res) => {
     });
   }
 
-  if (project.userId.toString() !== req.user._id.toString()) {
+  // Check if user owns the project or if it's public
+  const isOwner =
+    req.user && project.userId.toString() === req.user._id.toString();
+
+  if (!isOwner && !project.isPublic) {
     return res.status(403).json({
       success: false,
-      message: "Access denied",
+      message: req.user
+        ? "Access denied. This project belongs to another user and is private."
+        : "Access denied. Authentication required for private projects.",
+      debug: {
+        projectOwner: project.userId,
+        currentUser: req.user?._id || "Anonymous",
+        isPublic: project.isPublic,
+      },
     });
   }
 
   const fileTree = await File.buildFileTree(projectId);
+  console.log("File tree built:", fileTree?.length || 0, "files");
 
   res.status(200).json({
     success: true,
@@ -470,6 +370,7 @@ const moveFile = asyncHandler(async (req, res) => {
 // @route   GET /api/files/project/:projectId/search
 // @access  Private
 const searchFiles = asyncHandler(async (req, res) => {
+  console.log("coming");
   const { projectId } = req.params;
   const { q: query, type, limit = 50 } = req.query;
 
@@ -535,32 +436,138 @@ const getFileDownloadUrl = asyncHandler(async (req, res) => {
     });
   }
 
-  if (!file.s3Key) {
+  // Return file content directly since it's stored in MongoDB
+  res.status(200).json({
+    success: true,
+    data: {
+      content: file.content,
+      fileName: file.name,
+      size: file.content.length,
+      mimeType: file.mimeType,
+    },
+  });
+});
+
+// @desc    Bulk update files for a project
+// @route   PUT /api/files/project/:projectId/bulk
+// @access  Private
+const bulkUpdateFiles = asyncHandler(async (req, res) => {
+  const { projectId } = req.params;
+  const { files } = req.body;
+
+  // Check if project exists and user owns it
+  const project = await Project.findById(projectId);
+  if (!project) {
+    return res.status(404).json({
+      success: false,
+      message: "Project not found",
+    });
+  }
+
+  if (project.userId.toString() !== req.user._id.toString()) {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied",
+    });
+  }
+
+  if (!Array.isArray(files)) {
     return res.status(400).json({
       success: false,
-      message: "File not stored in S3",
+      message: "Files must be an array",
     });
   }
 
-  try {
-    const result = await s3Service.generatePresignedDownloadUrl(file.s3Key);
+  const results = {
+    created: [],
+    updated: [],
+    errors: [],
+  };
 
-    res.status(200).json({
-      success: true,
-      data: {
-        downloadUrl: result.downloadUrl,
-        fileName: file.name,
-        size: file.size,
-        mimeType: file.mimeType,
+  console.log(`Processing ${files.length} files for project ${projectId}`);
+
+  // Process each file
+  for (const fileData of files) {
+    try {
+      const { path, content, name, type = "file", language } = fileData;
+
+      console.log(`Processing file: ${path} (${name})`);
+
+      if (!path || !name) {
+        console.warn(`Skipping file with missing path or name:`, fileData);
+        results.errors.push({
+          path: path || "unknown",
+          error: "Path and name are required",
+        });
+        continue;
+      }
+
+      // Check if file already exists
+      const existingFile = await File.findOne({ projectId, path });
+
+      if (existingFile) {
+        // Update existing file
+        console.log(`Updating existing file: ${path}`);
+        existingFile.content = content || "";
+        existingFile.lastModified = new Date();
+        if (language) existingFile.language = language;
+
+        await existingFile.save();
+        results.updated.push({
+          id: existingFile._id,
+          path: existingFile.path,
+          name: existingFile.name,
+        });
+      } else {
+        // Create new file
+        console.log(`Creating new file: ${path}`);
+        const newFile = new File({
+          name,
+          projectId,
+          path,
+          type,
+          content: content || "",
+          language: language || "text",
+          createdBy: req.user._id,
+          lastModified: new Date(),
+        });
+
+        await newFile.save();
+        results.created.push({
+          id: newFile._id,
+          path: newFile.path,
+          name: newFile.name,
+        });
+        console.log(
+          `Successfully created file: ${path} with ID: ${newFile._id}`
+        );
+      }
+    } catch (error) {
+      console.error(`Error processing file ${fileData.path}:`, error);
+      results.errors.push({
+        path: fileData.path || "unknown",
+        error: error.message,
+      });
+    }
+  }
+
+  // Update project's last modified date
+  project.metadata.lastModified = new Date();
+  await project.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Bulk file update completed",
+    data: {
+      results,
+      summary: {
+        total: files.length,
+        created: results.created.length,
+        updated: results.updated.length,
+        errors: results.errors.length,
       },
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to generate download URL",
-      error: error.message,
-    });
-  }
+    },
+  });
 });
 
 module.exports = {
@@ -572,4 +579,5 @@ module.exports = {
   moveFile,
   searchFiles,
   getFileDownloadUrl,
+  bulkUpdateFiles,
 };

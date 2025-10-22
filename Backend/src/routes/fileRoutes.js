@@ -9,10 +9,12 @@ const {
   moveFile,
   searchFiles,
   getFileDownloadUrl,
+  bulkUpdateFiles,
 } = require("../controllers/fileController");
 
 const {
   authenticate,
+  optionalAuth,
   authorizeFile,
   apiRateLimit,
   fileRateLimit,
@@ -21,11 +23,64 @@ const {
   handleValidationErrors,
 } = require("../middleware");
 
-// All routes require authentication
+// Project-specific file operations (allow public access for public projects)
+router.get(
+  "/project/:projectId/tree",
+  optionalAuth,
+  apiRateLimit,
+  (req, res, next) => {
+    // Validate projectId parameter
+    const { param } = require("express-validator");
+    param("projectId").isMongoId().withMessage("Invalid project ID format")(
+      req,
+      res,
+      next
+    );
+  },
+  handleValidationErrors,
+  getProjectFileTree
+);
+
+router.get(
+  "/project/:projectId/search",
+  optionalAuth,
+  apiRateLimit,
+  (req, res, next) => {
+    // Validate projectId parameter
+    const { param } = require("express-validator");
+    param("projectId").isMongoId().withMessage("Invalid project ID format")(
+      req,
+      res,
+      next
+    );
+  },
+  handleValidationErrors,
+  searchFiles
+);
+
+// All other routes require authentication
 router.use(authenticate);
-router.use(apiRateLimit);
 
 // File CRUD operations
+router.use(apiRateLimit);
+
+// Bulk update files for a project
+router.put(
+  "/project/:projectId/bulk",
+  fileRateLimit,
+  (req, res, next) => {
+    // Validate projectId parameter
+    const { param } = require("express-validator");
+    param("projectId").isMongoId().withMessage("Invalid project ID format")(
+      req,
+      res,
+      next
+    );
+  },
+  handleValidationErrors,
+  bulkUpdateFiles
+);
+
 router.post(
   "/",
   fileRateLimit,
@@ -67,21 +122,6 @@ router.get(
   commonValidation.mongoId,
   handleValidationErrors,
   getFileDownloadUrl
-);
-
-// Project-specific file operations
-router.get(
-  "/project/:projectId/tree",
-  commonValidation.mongoId,
-  handleValidationErrors,
-  getProjectFileTree
-);
-
-router.get(
-  "/project/:projectId/search",
-  commonValidation.mongoId,
-  handleValidationErrors,
-  searchFiles
 );
 
 module.exports = router;

@@ -9,21 +9,44 @@ export default function useProject(initialProjectId = "default") {
   const [project, setProject] = useState(null);
   const [files, setFiles] = useState(DEFAULT_FILES);
   const [activePath, setActivePath] = useState(Object.keys(DEFAULT_FILES)[0]);
-  const [autosave, setAutosave] = useState(true);
+  const [autosave, setAutosave] = useState(false); // Disabled by default to reduce performance issues
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Convert backend file structure to frontend format
   const convertBackendFiles = useCallback((backendFiles) => {
+    console.log("Converting backend files:", backendFiles);
     const frontendFiles = {};
 
-    if (Array.isArray(backendFiles)) {
-      backendFiles.forEach((file) => {
-        frontendFiles[file.path] = file.content;
+    // Recursive function to traverse the tree structure
+    const traverseTree = (items) => {
+      if (!Array.isArray(items)) return;
+
+      items.forEach((item) => {
+        if (item.type === "file" && item.path && item.content !== undefined) {
+          // Ensure path starts with / for frontend compatibility
+          const normalizedPath = item.path.startsWith("/")
+            ? item.path
+            : `/${item.path}`;
+          console.log(
+            `Adding file: ${normalizedPath} with content length: ${item.content.length}`
+          );
+          frontendFiles[normalizedPath] = item.content;
+        } else if (item.type === "folder" && item.children) {
+          // Recursively process children
+          traverseTree(item.children);
+        }
       });
+    };
+
+    // Handle tree structure from backend
+    if (Array.isArray(backendFiles)) {
+      traverseTree(backendFiles);
     }
 
+    console.log("Converted frontend files:", frontendFiles);
     return Object.keys(frontendFiles).length > 0
       ? frontendFiles
       : DEFAULT_FILES;
@@ -36,7 +59,8 @@ export default function useProject(initialProjectId = "default") {
       content,
       projectId: projectIdValue,
       name: path.split("/").pop() || "untitled",
-      type: getFileType(path),
+      type: "file", // Backend expects "file" type
+      language: getFileType(path), // Use language instead of type for file extension
     }));
   }, []);
 
@@ -64,32 +88,52 @@ export default function useProject(initialProjectId = "default") {
       setError(null);
 
       try {
-        if (isAuthenticated && projectIdValue !== "default") {
-          // Load from backend
-          const projectResponse = await projectsApi.getById(projectIdValue);
-          const filesResponse = await filesApi.getProjectTree(projectIdValue);
+        if (projectIdValue !== "default") {
+          // Try to load from backend (works for both authenticated users and public projects)
+          try {
+            const projectResponse = await projectsApi.getById(projectIdValue);
+            const filesResponse = await filesApi.getProjectTree(projectIdValue);
 
-          setProject(projectResponse.data.project);
-          const loadedFiles = convertBackendFiles(filesResponse.data.files);
-          setFiles(loadedFiles);
-          setActivePath(Object.keys(loadedFiles)[0] || "");
-        } else {
-          // Load from localStorage for guest mode or default project
-          const key = `cipherstudio:${projectIdValue}`;
-          const raw = localStorage.getItem(key);
+            console.log("Project response:", projectResponse);
+            console.log("Files response:", filesResponse);
 
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            setFiles(parsed.files || DEFAULT_FILES);
-            setActivePath(
-              parsed.activePath || Object.keys(parsed.files || DEFAULT_FILES)[0]
+            setProject(projectResponse.data.project);
+            const loadedFiles = convertBackendFiles(
+              filesResponse.data.fileTree
             );
-          } else {
-            setFiles(DEFAULT_FILES);
-            setActivePath(Object.keys(DEFAULT_FILES)[0]);
+            console.log("Final loaded files:", loadedFiles);
+            console.log("Available file paths:", Object.keys(loadedFiles));
+
+            setFiles(loadedFiles);
+            const firstFilePath = Object.keys(loadedFiles)[0] || "";
+            console.log("Setting active path to:", firstFilePath);
+            setActivePath(firstFilePath);
+            setHasUnsavedChanges(false); // Mark as saved since we just loaded
+            return; // Successfully loaded from backend
+          } catch (backendError) {
+            console.log(
+              "Backend loading failed, trying localStorage:",
+              backendError
+            );
+            // Fall through to localStorage loading
           }
-          setProject(null);
         }
+
+        // Load from localStorage for guest mode, default project, or when backend fails
+        const key = `cipherstudio:${projectIdValue}`;
+        const raw = localStorage.getItem(key);
+
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          setFiles(parsed.files || DEFAULT_FILES);
+          setActivePath(
+            parsed.activePath || Object.keys(parsed.files || DEFAULT_FILES)[0]
+          );
+        } else {
+          setFiles(DEFAULT_FILES);
+          setActivePath(Object.keys(DEFAULT_FILES)[0]);
+        }
+        setProject(null);
       } catch (err) {
         console.error("Error loading project:", err);
         setError(err.message);
@@ -119,7 +163,7 @@ export default function useProject(initialProjectId = "default") {
         setIsLoading(false);
       }
     },
-    [projectId, isAuthenticated, convertBackendFiles]
+    [isAuthenticated, convertBackendFiles]
   );
 
   // Save project to backend or localStorage
@@ -130,30 +174,28 @@ export default function useProject(initialProjectId = "default") {
     setError(null);
 
     try {
-      if (isAuthenticated && projectId !== "default") {
+      if (isAuthenticated && projectId !== "default" && project) {
+        // For authenticated users with existing projects, use bulk update
         const backendFiles = convertFrontendFiles(files, projectId);
 
-        if (project) {
-          // Update existing project
-          await projectsApi.update(projectId, {
-            files: backendFiles,
-            lastModified: new Date().toISOString(),
-          });
-        } else {
-          // Create new project
-          const newProject = await projectsApi.create({
-            name: projectId,
-            description: `Project ${projectId}`,
-            files: backendFiles,
-          });
-          setProject(newProject.data.project);
-          setProjectId(newProject.data.project._id);
-        }
-      } else {
-        // Save to localStorage for guest mode
-        const key = `cipherstudio:${projectId}`;
-        localStorage.setItem(key, JSON.stringify({ files, activePath }));
+        console.log(
+          `Saving ${backendFiles.length} files to backend via bulk update...`
+        );
+        console.log(
+          "Files to save:",
+          backendFiles.map((f) => f.path)
+        );
+
+        const result = await filesApi.bulkUpdate(projectId, backendFiles);
+        console.log("Bulk update result:", result);
+        console.log("Files saved to backend successfully");
       }
+
+      // Always save to localStorage as backup
+      const key = `cipherstudio:${projectId}`;
+      localStorage.setItem(key, JSON.stringify({ files, activePath }));
+
+      console.log("Project saved to localStorage");
     } catch (err) {
       console.error("Error saving project:", err);
       setError(err.message);
@@ -163,6 +205,7 @@ export default function useProject(initialProjectId = "default") {
       localStorage.setItem(key, JSON.stringify({ files, activePath }));
     } finally {
       setIsSaving(false);
+      setHasUnsavedChanges(false); // Clear unsaved changes flag after successful save
     }
   }, [
     files,
@@ -170,7 +213,6 @@ export default function useProject(initialProjectId = "default") {
     projectId,
     project,
     isAuthenticated,
-    isSaving,
     convertFrontendFiles,
   ]);
 
@@ -188,17 +230,26 @@ export default function useProject(initialProjectId = "default") {
       }
 
       try {
+        // Create project first without files, then add files with correct projectId
         const newProject = await projectsApi.create({
           name,
           description,
-          files: convertFrontendFiles(DEFAULT_FILES, null),
+          files: convertFrontendFiles(DEFAULT_FILES, "temp"), // Temp projectId, will be replaced in backend
         });
 
+        const projectId = newProject.data.project._id;
+
         setProject(newProject.data.project);
-        setProjectId(newProject.data.project._id);
+        setProjectId(projectId);
         setFiles(DEFAULT_FILES);
         setActivePath(Object.keys(DEFAULT_FILES)[0]);
+        setHasUnsavedChanges(false); // Mark as saved since we just created
 
+        console.log(
+          `Created new project: ${projectId} with ${
+            Object.keys(DEFAULT_FILES).length
+          } files`
+        );
         return newProject.data.project;
       } catch (err) {
         console.error("Error creating project:", err);
@@ -209,21 +260,32 @@ export default function useProject(initialProjectId = "default") {
     [isAuthenticated, convertFrontendFiles]
   );
 
-  // Load project when projectId changes
+  // Load project when projectId changes (but not if we just created it)
+  const [skipNextLoad, setSkipNextLoad] = useState(false);
+
   useEffect(() => {
+    if (skipNextLoad) {
+      setSkipNextLoad(false);
+      return;
+    }
     loadProject(projectId);
-  }, [projectId, loadProject]);
+  }, [projectId]); // Remove loadProject from dependencies to prevent infinite loop
 
-  // Auto-save functionality
+  // Auto-save functionality with debouncing and change detection
   useEffect(() => {
-    if (!autosave || projectId === "default") return;
+    if (!autosave || projectId === "default" || isSaving) return;
 
+    // Debounce autosave - only save after 5 seconds of inactivity
     const timeoutId = setTimeout(() => {
-      saveProject();
-    }, 2000); // Auto-save after 2 seconds of inactivity
+      // Only save if there are actual changes (not just loading)
+      if (Object.keys(files).length > 0 && !isLoading) {
+        console.log("Auto-saving project...");
+        saveProject();
+      }
+    }, 5000); // Increased to 5 seconds to reduce frequency
 
     return () => clearTimeout(timeoutId);
-  }, [files, activePath, autosave, projectId, saveProject]);
+  }, [files, autosave, projectId, isSaving, isLoading]); // Removed activePath and saveProject to reduce triggers
 
   // Convert files to Sandpack format
   const sandpackFiles = useMemo(() => {
@@ -239,6 +301,7 @@ export default function useProject(initialProjectId = "default") {
   // File operations
   const updateFile = useCallback((path, content) => {
     setFiles((prev) => ({ ...prev, [path]: content }));
+    setHasUnsavedChanges(true); // Mark as having unsaved changes
   }, []);
 
   const createFile = useCallback(
@@ -251,24 +314,11 @@ export default function useProject(initialProjectId = "default") {
 
       setFiles((prev) => ({ ...prev, [normalizedPath]: content }));
       setActivePath(normalizedPath);
+      setHasUnsavedChanges(true); // Mark as having unsaved changes to trigger autosave
 
-      // If authenticated and not default project, create file in backend
-      if (isAuthenticated && projectId !== "default" && project) {
-        try {
-          await filesApi.create({
-            name: normalizedPath.split("/").pop(),
-            path: normalizedPath,
-            content,
-            projectId: project._id,
-            type: getFileType(normalizedPath),
-          });
-        } catch (err) {
-          console.error("Error creating file in backend:", err);
-          // File is already created locally, so continue
-        }
-      }
+      console.log(`Created new file: ${normalizedPath}`);
     },
-    [files, isAuthenticated, projectId, project]
+    [files]
   );
 
   const deleteFile = useCallback(
@@ -402,6 +452,7 @@ export default function useProject(initialProjectId = "default") {
     isLoading,
     isSaving,
     error,
+    hasUnsavedChanges,
 
     // File operations
     updateFile,

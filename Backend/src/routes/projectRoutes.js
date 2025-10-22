@@ -32,6 +32,16 @@ router.get(
   getPublicProjects
 );
 
+// Public project by ID (allows access to public projects without auth)
+router.get(
+  "/:id",
+  optionalAuth,
+  apiRateLimit,
+  projectValidation.getById,
+  handleValidationErrors,
+  getProjectById
+);
+
 // Protected routes (require authentication)
 router.use(authenticate);
 router.use(apiRateLimit);
@@ -50,13 +60,6 @@ router.get(
   projectValidation.getUserProjects,
   handleValidationErrors,
   getUserProjects
-);
-
-router.get(
-  "/:id",
-  projectValidation.getById,
-  handleValidationErrors,
-  getProjectById
 );
 
 router.put(

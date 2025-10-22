@@ -55,9 +55,6 @@ Thumbs.db
 # dotenv environment variables file
 .env
 
-# AWS credentials
-.aws/
-
 # Temporary files
 uploads/
 temp/

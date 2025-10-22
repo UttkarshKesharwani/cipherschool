@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import AuthModal from "./AuthModal";
 import UserProfile from "./UserProfile";
+import { useSearchParams } from "react-router-dom";
 
 export default function TopBar({
   projectId,
@@ -16,6 +17,7 @@ export default function TopBar({
   setTheme,
   isSaving,
   isLoading,
+  hasUnsavedChanges,
 }) {
   const { isAuthenticated, user, logout } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -23,6 +25,49 @@ export default function TopBar({
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Sync project ID with URL search parameters
+  useEffect(() => {
+    const urlProjectId = searchParams.get("projectId");
+    if (urlProjectId && urlProjectId !== projectId) {
+      // Update project ID from URL and trigger load
+      setProjectId(urlProjectId);
+      // Optionally auto-load the project
+      if (onLoad && urlProjectId !== "default") {
+        setTimeout(() => onLoad(), 100); // Small delay to ensure projectId is updated
+      }
+    } else if (projectId && projectId !== "default" && !urlProjectId) {
+      // Update URL with current project ID
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        newParams.set("projectId", projectId);
+        return newParams;
+      });
+    }
+  }, [searchParams, projectId, setProjectId, setSearchParams, onLoad]);
+
+  // Handle project ID input change
+  const handleProjectIdChange = (e) => {
+    const newProjectId = e.target.value;
+    setProjectId(newProjectId);
+
+    // Update URL search params
+    if (newProjectId && newProjectId !== "default") {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        newParams.set("projectId", newProjectId);
+        return newParams;
+      });
+    } else {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        newParams.delete("projectId");
+        return newParams;
+      });
+    }
+  };
 
   const handleLogin = () => {
     setAuthMode("login");
@@ -45,15 +90,29 @@ export default function TopBar({
     }
   };
 
-  const handleNewProject = (e) => {
+  const handleNewProject = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const name = formData.get("name");
     const description = formData.get("description");
 
     if (name) {
-      onCreateProject(name, description);
-      setShowNewProjectModal(false);
+      try {
+        const newProject = await onCreateProject(name, description);
+        setShowNewProjectModal(false);
+
+        // Update URL with new project ID
+        if (newProject && newProject.id) {
+          setSearchParams((prev) => {
+            const newParams = new URLSearchParams(prev);
+            newParams.set("projectId", newProject.id);
+            return newParams;
+          });
+        }
+      } catch (error) {
+        console.error("Failed to create project:", error);
+        setShowNewProjectModal(false);
+      }
     }
   };
 
@@ -64,19 +123,42 @@ export default function TopBar({
           <h2>CipherStudio</h2>
         </div>
         <div className="center">
+          <label htmlFor="">Enter Project ID</label>
           <input
             value={projectId}
-            onChange={(e) => setProjectId(e.target.value)}
+            onChange={handleProjectIdChange}
             className="project-input"
             placeholder="Project ID"
           />
-          <button onClick={onSave} disabled={isSaving}>
-            {isSaving ? "Saving..." : "Save"}
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            className={hasUnsavedChanges ? "unsaved-changes" : ""}
+          >
+            {isSaving ? "Saving..." : hasUnsavedChanges ? "Save*" : "Save"}
           </button>
           <button onClick={onLoad} disabled={isLoading}>
             {isLoading ? "Loading..." : "Load"}
           </button>
           <button onClick={handleCreateProject}>+ New Project</button>
+          {projectId && projectId !== "default" && (
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}${window.location.pathname}?projectId=${projectId}`;
+                navigator.clipboard
+                  .writeText(url)
+                  .then(() => {
+                    alert("Shareable URL copied to clipboard!");
+                  })
+                  .catch(() => {
+                    alert(`Shareable URL: ${url}`);
+                  });
+              }}
+              title="Copy shareable URL"
+            >
+              🔗 Share
+            </button>
+          )}
           <label className="autosave">
             <input
               type="checkbox"

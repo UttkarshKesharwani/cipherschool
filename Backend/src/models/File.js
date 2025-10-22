@@ -32,14 +32,9 @@ const fileSchema = new mongoose.Schema(
       required: [true, "Path is required"],
       trim: true,
     },
-    s3Key: {
-      type: String,
-      trim: true,
-      default: null, // Only for files, not folders
-    },
     content: {
       type: String,
-      default: "", // Cached content for quick access
+      default: "", // File content stored directly in MongoDB
       maxlength: [1000000, "File content too large"], // 1MB limit
     },
     language: {

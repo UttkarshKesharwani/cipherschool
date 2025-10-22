@@ -33,6 +33,7 @@ function AppContent() {
     isSaving,
     isLoading,
     error,
+    hasUnsavedChanges,
   } = project;
 
   const [theme, setTheme] = useState("dark");
@@ -105,6 +106,7 @@ function AppContent() {
         setTheme={setTheme}
         isSaving={isSaving}
         isLoading={isLoading}
+        hasUnsavedChanges={hasUnsavedChanges}
       />
 
       <SandpackProvider

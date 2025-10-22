@@ -28,7 +28,7 @@ const projectSchema = new mongoose.Schema(
     },
     isPublic: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     tags: [
       {

@@ -197,6 +197,7 @@ const createProject = asyncHandler(async (req, res) => {
     template = "react",
     isPublic = false,
     tags = [],
+    files = [], // Accept files from frontend
   } = req.body;
 
   // Create project
@@ -209,15 +210,48 @@ const createProject = asyncHandler(async (req, res) => {
     tags,
   });
 
-  // Create template files if template is provided
-  if (template && defaultTemplates[template]) {
-    await createTemplateFiles(project._id, defaultTemplates[template].files);
+  // Create files - prioritize files from frontend, fallback to template
+  if (files && files.length > 0) {
+    // Use files sent from frontend
+    console.log(
+      `Creating ${files.length} files from frontend for project ${project._id}`
+    );
 
-    // Update project metadata
-    const totalFiles = await File.countDocuments({ projectId: project._id });
-    project.metadata.totalFiles = totalFiles;
-    await project.save();
+    for (const fileData of files) {
+      try {
+        const { path, content, name, type = "file", language } = fileData;
+
+        if (!path || !name) {
+          console.warn("Skipping file with missing path or name:", fileData);
+          continue;
+        }
+
+        const file = new File({
+          name,
+          projectId: project._id, // Use the actual project ID
+          path,
+          type,
+          content: content || "",
+          language: language || "text",
+          createdBy: req.user._id,
+          lastModified: new Date(),
+        });
+
+        await file.save();
+        console.log(`Created file: ${path}`);
+      } catch (error) {
+        console.error(`Error creating file ${fileData.path}:`, error);
+      }
+    }
+  } else if (template && defaultTemplates[template]) {
+    // Fallback to template files if no files provided
+    await createTemplateFiles(project._id, defaultTemplates[template].files);
   }
+
+  // Update project metadata
+  const totalFiles = await File.countDocuments({ projectId: project._id });
+  project.metadata.totalFiles = totalFiles;
+  await project.save();
 
   // Populate the project with user info
   await project.populate("userId", "username email firstName lastName");
@@ -305,7 +339,13 @@ const getProjectById = asyncHandler(async (req, res) => {
   ) {
     return res.status(403).json({
       success: false,
-      message: "Access denied",
+      message:
+        "Access denied. This project belongs to another user and is private.",
+      debug: {
+        projectOwner: project.userId.email,
+        currentUser: req.user.email,
+        isPublic: project.isPublic,
+      },
     });
   }
 
@@ -436,7 +476,7 @@ const archiveProject = asyncHandler(async (req, res) => {
 
 // @desc    Restore a project
 // @route   PUT /api/projects/:id/restore
-// @access  Private 
+// @access  Private
 const restoreProject = asyncHandler(async (req, res) => {
   const project = await Project.findById(req.params.id);
 

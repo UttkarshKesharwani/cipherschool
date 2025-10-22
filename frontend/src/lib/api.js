@@ -266,6 +266,14 @@ export const filesApi = {
 
     return response.blob();
   },
+
+  // Bulk update files for a project
+  bulkUpdate: async (projectId, files) => {
+    return await apiRequest(`/files/project/${projectId}/bulk`, {
+      method: "PUT",
+      body: JSON.stringify({ files }),
+    });
+  },
 };
 
 // Export utilities
