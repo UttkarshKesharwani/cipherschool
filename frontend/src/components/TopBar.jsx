@@ -10,6 +10,7 @@ export default function TopBar({
   onSave,
   onLoad,
   onCreateProject,
+  onShowProjectList,
   autosave,
   setAutosave,
   onAddFile,
@@ -28,25 +29,21 @@ export default function TopBar({
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Sync project ID with URL search parameters
+  // Only sync projectId to URL (one-way sync to avoid conflicts)
   useEffect(() => {
     const urlProjectId = searchParams.get("projectId");
-    if (urlProjectId && urlProjectId !== projectId) {
-      // Update project ID from URL and trigger load
-      setProjectId(urlProjectId);
-      // Optionally auto-load the project
-      if (onLoad && urlProjectId !== "default") {
-        setTimeout(() => onLoad(), 100); // Small delay to ensure projectId is updated
-      }
-    } else if (projectId && projectId !== "default" && !urlProjectId) {
-      // Update URL with current project ID
+
+    // Only update URL if projectId changes and is different from URL
+    // Don't sync from URL back to projectId - that's handled by App.jsx
+    if (projectId && projectId !== "default" && projectId !== urlProjectId) {
+      console.log("TopBar: Updating URL with projectId:", projectId);
       setSearchParams((prev) => {
         const newParams = new URLSearchParams(prev);
         newParams.set("projectId", projectId);
         return newParams;
       });
     }
-  }, [searchParams, projectId, setProjectId, setSearchParams, onLoad]);
+  }, [projectId, setSearchParams]);
 
   // Handle project ID input change
   const handleProjectIdChange = (e) => {
@@ -101,16 +98,11 @@ export default function TopBar({
         const newProject = await onCreateProject(name, description);
         setShowNewProjectModal(false);
 
-        // Update URL with new project ID
-        if (newProject && newProject.id) {
-          setSearchParams((prev) => {
-            const newParams = new URLSearchParams(prev);
-            newParams.set("projectId", newProject.id);
-            return newParams;
-          });
-        }
+        // The URL update and project loading is now handled by handleCreateProject
+        console.log("Project creation completed:", newProject?._id);
       } catch (error) {
         console.error("Failed to create project:", error);
+        alert("Failed to create project: " + error.message);
         setShowNewProjectModal(false);
       }
     }
@@ -140,6 +132,7 @@ export default function TopBar({
           <button onClick={onLoad} disabled={isLoading}>
             {isLoading ? "Loading..." : "Load"}
           </button>
+          <button onClick={onShowProjectList}>📁 My Projects</button>
           <button onClick={handleCreateProject}>+ New Project</button>
           {projectId && projectId !== "default" && (
             <button
