@@ -84,45 +84,21 @@ function AppContent() {
 
   const handleCreateProject = async (name, description = "") => {
     try {
-      console.log("Creating new project:", name);
       const newProject = await createProject(name, description);
-      console.log("Project created:", newProject);
-
-      // Get the new project ID
       const newProjectId = newProject._id;
-      console.log("New project ID:", newProjectId);
 
-      // The createProject function already sets projectId internally and loads the project
-      // TopBar will automatically sync the URL when projectId updates
-      // Just force a Sandpack refresh to ensure preview is updated
       setForceRefresh((prev) => prev + 1);
 
-      console.log(
-        `Successfully created and switched to project: ${newProjectId}`
-      );
-      return newProject; // Return the project for TopBar
+      return newProject;
     } catch (err) {
-      console.error("Failed to create project:", err);
       alert("Failed to create project: " + err.message);
-      throw err; // Re-throw for TopBar error handling
-    }
-  };
-
-  const handleAddFile = () => {
-    const path = prompt("Enter new file path", "/src/NewFile.jsx");
-    if (path) {
-      try {
-        createFile(path);
-      } catch (err) {
-        alert("Failed to create file: " + err.message);
-      }
+      throw err;
     }
   };
 
   const handleSave = async () => {
     try {
       await saveProject();
-      console.log("Project saved successfully");
     } catch (err) {
       alert("Failed to save project: " + err.message);
     }
@@ -144,23 +120,15 @@ function AppContent() {
   };
 
   const handleSelectProject = (selectedProjectId) => {
-    console.log("Switching to project:", selectedProjectId);
-
-    // Close the project list first
     setShowProjectList(false);
-
-    // Update the project ID - TopBar will automatically update URL
     setProjectId(selectedProjectId);
 
-    // Load the project and refresh UI
     setTimeout(() => {
       loadProject(selectedProjectId)
         .then(() => {
           setForceRefresh((prev) => prev + 1);
-          console.log("Project loaded and UI refreshed:", selectedProjectId);
         })
         .catch((err) => {
-          console.error("Failed to load selected project:", err);
           alert("Failed to load project: " + err.message);
         });
     }, 100);
@@ -175,39 +143,6 @@ function AppContent() {
         </div>
       )}
 
-      {/* Debug Panel to show project ID sync */}
-      <div
-        style={{
-          position: "fixed",
-          top: "60px",
-          right: "10px",
-          background: "rgba(0,0,0,0.8)",
-          color: "white",
-          padding: "10px",
-          fontSize: "12px",
-          fontFamily: "monospace",
-          zIndex: 9999,
-          borderRadius: "4px",
-          minWidth: "250px",
-        }}
-      >
-        <div>
-          <strong>Current Project ID:</strong> {projectId}
-        </div>
-        <div>
-          <strong>URL Param:</strong>{" "}
-          {new URLSearchParams(window.location.search).get("projectId") ||
-            "none"}
-        </div>
-        <div>
-          <strong>Files Count:</strong> {Object.keys(files).length}
-        </div>
-        <div>
-          <strong>Active File:</strong> {activePath?.split("/").pop() || "none"}
-        </div>
-        {isLoading && <div style={{ color: "yellow" }}>🔄 Loading...</div>}
-      </div>
-
       <TopBar
         projectId={projectId}
         setProjectId={setProjectId}
@@ -217,7 +152,6 @@ function AppContent() {
         onShowProjectList={handleShowProjectList}
         autosave={autosave}
         setAutosave={setAutosave}
-        onAddFile={handleAddFile}
         theme={theme}
         setTheme={setTheme}
         isSaving={isSaving}

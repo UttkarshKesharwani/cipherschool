@@ -32,12 +32,8 @@ function Icon({ isFile, open }) {
   // Files should not show any icon (user requested no icon for files).
   // Render an empty spacer for alignment.
   if (isFile) return <span className="fe-icon file-spacer" />;
-  // VS Code-like chevrons: closed ▶, open ▼
-  return (
-    <span className={`fe-icon chevron ${open ? "open" : "closed"}`}>
-      {open ? "v" : ">"}
-    </span>
-  );
+  // VS Code style chevron: starts pointing right, rotates 90deg to point down
+  return <span className={`fe-icon chevron ${open ? "open" : ""}`}>›</span>;
 }
 
 function TreeNode({

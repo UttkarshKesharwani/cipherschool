@@ -1,34 +1,82 @@
 /* Theme variables and color tokens */
 :root {
-  --bg: #1e1e1e;
+  /* Primary theme colors */
+  --bg: #0f111a;
+  --bg-light: #ffffff;
   --panel: #0b1220;
+  --sidebar-bg: #1e1e1e;
+  --sidebar-border: #2d2d30;
   --muted: #94a3b8;
-  --accent: #60a5fa;
+  --accent: #007acc;
   --card: #0b1226;
-  --text: #f5f5f5;
-  --border: #333;
+  --text: #cccccc;
+  --border: #2d2d30;
+  --hover: #2a2d2e;
 
-  /* Additional variables for components */
+  /* Legacy variable mappings for compatibility */
   --bg-color: var(--bg);
   --text-color: var(--text);
   --text-secondary: var(--muted);
   --surface-color: var(--card);
   --border-color: var(--border);
   --accent-color: var(--accent);
-  --accent-color-alpha: rgba(96, 165, 250, 0.1);
-  --hover-bg: rgba(255, 255, 255, 0.05);
+  --accent-color-alpha: rgba(0, 122, 204, 0.1);
+  --hover-bg: var(--hover);
+
+  /* Typography */
+  --font-family: "Inter", "Segoe UI", sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+
+  /* File Explorer Icon Colors - Bright and vibrant */
+  --icon-folder: #ffbb33;
+  --icon-folder-open: #ffa726;
+  --icon-js: #f7df1e;
+  --icon-ts: #3178c6;
+  --icon-jsx: #61dafb;
+  --icon-tsx: #61dafb;
+  --icon-html: #e34f26;
+  --icon-css: #1572b6;
+  --icon-scss: #cf649a;
+  --icon-json: #85bb65;
+  --icon-md: #083fa1;
+  --icon-txt: #ffffff;
+  --icon-img: #ff6b6b;
+  --icon-svg: #ff9500;
+  --icon-default: #64b5f6;
+  --icon-chevron: #00d4ff;
+  --icon-header-btn: #64ffda;
 }
 
-:root[data-theme="light"] {
-  --bg: #f8f9fa;
+:root[data-theme="light"],
+[data-theme="light"] {
+  /* Primary theme colors */
+  --bg: #f9f9f9;
+  --bg-light: #ffffff;
   --panel: #ffffff;
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #ddd;
   --muted: #475569;
-  --accent: #2563eb;
+  --accent: #0077cc;
   --card: #ffffff;
-  --text: #222;
+  --text: #111;
   --border: #ddd;
+  --hover: #f0f0f0;
 
-  /* Additional variables for components */
+  /* Legacy variable mappings for compatibility */
   --bg-color: var(--bg);
   --text-color: var(--text);
   --text-secondary: var(--muted);
@@ -36,5 +84,24 @@
   --border-color: var(--border);
   --accent-color: var(--accent);
   --accent-color-alpha: rgba(37, 99, 235, 0.1);
-  --hover-bg: rgba(0, 0, 0, 0.05);
+  --hover-bg: var(--hover);
+
+  /* File Explorer Icon Colors - Light theme variations */
+  --icon-folder: #ff9800;
+  --icon-folder-open: #ff8f00;
+  --icon-js: #f7df1e;
+  --icon-ts: #3178c6;
+  --icon-jsx: #61dafb;
+  --icon-tsx: #61dafb;
+  --icon-html: #e34f26;
+  --icon-css: #1572b6;
+  --icon-scss: #cf649a;
+  --icon-json: #85bb65;
+  --icon-md: #083fa1;
+  --icon-txt: #424242;
+  --icon-img: #ff6b6b;
+  --icon-svg: #ff9500;
+  --icon-default: #2196f3;
+  --icon-chevron: #0288d1;
+  --icon-header-btn: #00acc1;
 }

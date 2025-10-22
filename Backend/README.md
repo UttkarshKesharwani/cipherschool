@@ -1,53 +1,40 @@
 # CipherStudio Backend API
 
-A powerful and scalable backend API for CipherStudio - a browser-based React IDE that allows users to create, edit, and manage React projects directly in the browser.
+A backend API for CipherStudio - a browser-based React IDE that allows users to create, edit, and manage React projects directly in the browser.
 
-## 🚀 Features
+## Features
 
 ### Core Features
 
-- **User Authentication**: JWT-based authentication with secure registration and login
-- **Project Management**: Create, update, delete, archive, and duplicate React projects
-- **File Management**: Full CRUD operations for files and folders with nested folder support
-- **AWS S3 Integration**: Secure file storage and retrieval using Amazon S3
-- **Real-time Collaboration**: Foundation for real-time file editing capabilities
-- **Security**: Rate limiting, input validation, and comprehensive security measures
+- **User Authentication**: JWT-based authentication with registration and login
+- **Project Management**: Create and retrieve React projects
+- **File Management**: Create, update, delete, and retrieve files with bulk operations
+- **Security**: Basic security measures with CORS and authentication
 
-### Additional Features
-
-- **Project Templates**: Pre-built React project templates
-- **File Search**: Search files within projects by name or content
-- **Project Statistics**: Track project metrics and user statistics
-- **Public Projects**: Share projects publicly with read-only access
-- **File Download**: Generate secure download URLs for project files
-
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Runtime**: Node.js
 - **Framework**: Express.js
 - **Database**: MongoDB with Mongoose ODM
-- **File Storage**: AWS S3
 - **Authentication**: JWT (JSON Web Tokens)
-- **Security**: Helmet, CORS, Rate Limiting
-- **Validation**: Express Validator
-- **Development**: Nodemon, Morgan
+- **Security**: CORS, Basic Rate Limiting
+- **Development**: Nodemon
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before running this application, make sure you have the following installed:
 
 - **Node.js** (v16.0.0 or higher)
-- **MongoDB** (v4.4 or higher) or MongoDB Atlas account
-- **AWS S3** bucket for file storage
-- **npm** or **yarn** package manager
+- **MongoDB Atlas account**
+- **npm** package manager
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/cipherstudio-backend.git
-cd cipherstudio-backend
+git clone https://github.com/UttkarshKesharwani/cipherschool.git
+cd cipher/Backend
 ```
 
 ### 2. Install Dependencies
@@ -62,40 +49,21 @@ Create a `.env` file in the root directory and configure the following variables
 
 ```env
 # Server Configuration
-NODE_ENV=development
+NODE_ENV=production
 PORT=5000
 
 # Database Configuration
-MONGODB_URI=mongodb://localhost:27017/cipherstudio
-# For MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/cipherstudio?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 
 # JWT Configuration
-JWT_SECRET=your_super_secret_jwt_key_here_change_this_in_production
+JWT_SECRET=your_jwt_secret_key
 JWT_EXPIRE=30d
-
-# AWS S3 Configuration
-AWS_ACCESS_KEY_ID=your_aws_access_key_id
-AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
-AWS_REGION=us-east-1
-AWS_S3_BUCKET_NAME=cipherstudio-files
 
 # CORS Configuration
 FRONTEND_URL=http://localhost:3000
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
 ```
 
-### 4. AWS S3 Setup
-
-1. Create an AWS S3 bucket
-2. Configure bucket permissions for your application
-3. Create IAM user with S3 access permissions
-4. Add the credentials to your `.env` file
-
-### 5. Start the Server
+### 4. Start the Server
 
 ```bash
 # Development mode with auto-restart
@@ -107,102 +75,7 @@ npm start
 
 The server will start on `http://localhost:5000` (or your configured PORT).
 
-## 📚 API Documentation
-
-### Base URL
-
-```
-http://localhost:5000/api
-```
-
-### Authentication
-
-Most endpoints require JWT authentication. Include the token in the Authorization header:
-
-```
-Authorization: Bearer <your_jwt_token>
-```
-
-### Endpoints Overview
-
-#### 🔐 Authentication (`/api/users`)
-
-- `POST /register` - Register a new user
-- `POST /login` - User login
-- `GET /profile` - Get user profile (Protected)
-- `PUT /profile` - Update user profile (Protected)
-- `PUT /change-password` - Change password (Protected)
-- `GET /stats` - Get user statistics (Protected)
-
-#### 📁 Projects (`/api/projects`)
-
-- `POST /` - Create a new project (Protected)
-- `GET /` - Get user's projects (Protected)
-- `GET /:id` - Get project by ID (Protected)
-- `PUT /:id` - Update project (Protected)
-- `DELETE /:id` - Delete project (Protected)
-- `PUT /:id/archive` - Archive project (Protected)
-- `PUT /:id/restore` - Restore project (Protected)
-- `POST /:id/duplicate` - Duplicate project (Protected)
-- `GET /public` - Get public projects
-
-#### 📄 Files (`/api/files`)
-
-- `POST /` - Create file or folder (Protected)
-- `GET /:id` - Get file content (Protected)
-- `PUT /:id` - Update file content (Protected)
-- `DELETE /:id` - Delete file or folder (Protected)
-- `PUT /:id/move` - Move file or folder (Protected)
-- `GET /:id/download` - Get file download URL (Protected)
-- `GET /project/:projectId/tree` - Get project file tree (Protected)
-- `GET /project/:projectId/search` - Search files in project (Protected)
-
-### Example API Calls
-
-#### Register a User
-
-```bash
-curl -X POST http://localhost:5000/api/users/register \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "username": "johndoe",
-    "email": "john@example.com",
-    "password": "SecurePass123",
-    "firstName": "John",
-    "lastName": "Doe"
-  }'
-```
-
-#### Create a Project
-
-```bash
-curl -X POST http://localhost:5000/api/projects \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer <your_token>" \\
-  -d '{
-    "name": "My React App",
-    "description": "A new React application",
-    "template": "react",
-    "isPublic": false
-  }'
-```
-
-#### Create a File
-
-```bash
-curl -X POST http://localhost:5000/api/files \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer <your_token>" \\
-  -d '{
-    "name": "App.js",
-    "projectId": "project_id_here",
-    "type": "file",
-    "content": "import React from '\''react'\'';\\n\\nfunction App() {\\n  return <div>Hello World</div>;\\n}\\n\\nexport default App;",
-    "language": "jsx"
-  }'
-```
-
-## 🗂 Project Structure
+## Project Structure
 
 ```
 src/
@@ -230,12 +103,11 @@ src/
 │   ├── fileRoutes.js      # File-related routes
 │   └── index.js          # Route exports
 ├── services/
-│   ├── s3Service.js       # AWS S3 integration
 │   └── index.js          # Service exports
 └── server.js             # Main application entry point
 ```
 
-## 🗄 Database Schema
+## Database Schema
 
 ### Users Collection
 
@@ -245,16 +117,6 @@ src/
   username: String (unique),
   email: String (unique),
   password: String (hashed),
-  firstName: String,
-  lastName: String,
-  avatar: String,
-  isActive: Boolean,
-  lastLogin: Date,
-  preferences: {
-    theme: String,
-    autoSave: Boolean,
-    fontSize: Number
-  },
   createdAt: Date,
   updatedAt: Date
 }
@@ -268,25 +130,7 @@ src/
   name: String,
   description: String,
   userId: ObjectId (ref: User),
-  template: String,
   isPublic: Boolean,
-  tags: [String],
-  settings: {
-    autoSave: Boolean,
-    autoSaveInterval: Number,
-    theme: String,
-    fontSize: Number,
-    wordWrap: Boolean,
-    minimap: Boolean
-  },
-  packageJson: Object,
-  metadata: {
-    totalFiles: Number,
-    totalSize: Number,
-    lastModified: Date
-  },
-  isArchived: Boolean,
-  archivedAt: Date,
   createdAt: Date,
   updatedAt: Date
 }
@@ -299,116 +143,40 @@ src/
   _id: ObjectId,
   name: String,
   projectId: ObjectId (ref: Project),
-  parentId: ObjectId (ref: File),
-  type: String, // 'file' or 'folder'
   path: String,
-  s3Key: String,
   content: String,
-  language: String,
-  size: Number,
-  encoding: String,
-  mimeType: String,
-  isReadOnly: Boolean,
-  metadata: {
-    lastModified: Date,
-    lastAccessed: Date,
-    version: Number,
-    checksum: String
-  },
-  permissions: {
-    read: Boolean,
-    write: Boolean,
-    execute: Boolean
-  },
+  type: String,
   createdAt: Date,
   updatedAt: Date
 }
 ```
 
-## 🔒 Security Features
+## Security Features
 
-- **JWT Authentication**: Secure token-based authentication
-- **Password Hashing**: Bcrypt with salt rounds for password security
-- **Rate Limiting**: Prevent API abuse with configurable rate limits
-- **Input Validation**: Comprehensive validation for all user inputs
-- **CORS Protection**: Configurable Cross-Origin Resource Sharing
-- **Helmet Security**: HTTP headers security middleware
-- **File Upload Security**: Secure file handling and storage
+- **JWT Authentication**: Token-based authentication
+- **Password Hashing**: Bcrypt for password security
+- **CORS Protection**: Cross-Origin Resource Sharing configuration
+- **Basic Rate Limiting**: Prevent API abuse
+- **Input Validation**: Basic validation for user inputs
 
-## 🚀 Deployment
+## Deployment
 
 ### Environment Setup
 
 1. Set `NODE_ENV=production`
 2. Use strong JWT secrets
-3. Configure production MongoDB instance
-4. Set up production AWS S3 bucket
-5. Configure proper CORS origins
+3. Configure production MongoDB Atlas instance
+4. Configure proper CORS origins
 
 ### Recommended Platforms
 
-- **Backend**: Render, Railway, Cyclic, or Heroku
+- **Backend**: Render, Railway, or Heroku
 - **Database**: MongoDB Atlas
-- **File Storage**: AWS S3
 
-### Docker Deployment (Optional)
+## License
 
-Create a `Dockerfile`:
+This project is licensed under the MIT License.
 
-```dockerfile
-FROM node:16-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-EXPOSE 5000
-CMD ["npm", "start"]
-```
+## Author
 
-## 📊 Monitoring and Logging
-
-- **Morgan**: HTTP request logging
-- **Error Handling**: Comprehensive error tracking
-- **Health Checks**: `/health` endpoint for monitoring
-- **Performance**: Compression middleware for better performance
-
-## 🧪 Testing
-
-```bash
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add some amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-For support, email your-email@example.com or create an issue in the GitHub repository.
-
-## 🔮 Future Enhancements
-
-- [ ] Real-time collaboration using WebSockets
-- [ ] File versioning and history
-- [ ] Project sharing with permissions
-- [ ] Code execution in sandboxed environment
-- [ ] Integration with external APIs
-- [ ] Advanced search capabilities
-- [ ] File compression and optimization
-- [ ] Backup and restore functionality
-
----
-
-**Built with ❤️ for CipherStudio IDE**
+Built by Uttkarsh Kesharwani

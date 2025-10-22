@@ -1,6 +1,11 @@
+/* Main stylesheet - imports all component styles in correct order */
 @import "./variables.css";
 @import "./layout.css";
+@import "./auth.css";
 @import "./topbar.css";
 @import "./explorer.css";
 @import "./editor.css";
 @import "./preview.css";
+@import "./project-list.css";
+@import "./user-profile.css";
+@import "./utilities.css";

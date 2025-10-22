@@ -119,60 +119,7 @@ app.get("/", (req, res) => {
   res.json({
     success: true,
     message: "Welcome to CipherStudio API",
-    description: "A powerful backend for browser-based React IDE",
-    documentation: "/api/docs",
-    health: "/health",
     version: "1.0.0",
-    endpoints: {
-      users: "/api/users",
-      projects: "/api/projects",
-      files: "/api/files",
-    },
-  });
-});
-
-// API documentation endpoint
-app.get("/api/docs", (req, res) => {
-  res.json({
-    success: true,
-    message: "CipherStudio API Documentation",
-    baseUrl: `${req.protocol}://${req.get("host")}`,
-    endpoints: {
-      authentication: {
-        register: "POST /api/users/register",
-        login: "POST /api/users/login",
-        profile: "GET /api/users/profile",
-        updateProfile: "PUT /api/users/profile",
-        changePassword: "PUT /api/users/change-password",
-        stats: "GET /api/users/stats",
-      },
-      projects: {
-        create: "POST /api/projects",
-        list: "GET /api/projects",
-        getById: "GET /api/projects/:id",
-        update: "PUT /api/projects/:id",
-        delete: "DELETE /api/projects/:id",
-        archive: "PUT /api/projects/:id/archive",
-        restore: "PUT /api/projects/:id/restore",
-        duplicate: "POST /api/projects/:id/duplicate",
-        public: "GET /api/projects/public",
-      },
-      files: {
-        create: "POST /api/files",
-        getById: "GET /api/files/:id",
-        update: "PUT /api/files/:id",
-        delete: "DELETE /api/files/:id",
-        move: "PUT /api/files/:id/move",
-        download: "GET /api/files/:id/download",
-        projectTree: "GET /api/files/project/:projectId/tree",
-        search: "GET /api/files/project/:projectId/search",
-      },
-    },
-    authentication: {
-      type: "Bearer Token",
-      header: "Authorization: Bearer <token>",
-      note: "Include JWT token in Authorization header for protected routes",
-    },
   });
 });
 
@@ -187,12 +134,11 @@ const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`
-🚀 CipherStudio API Server is running!
-🌐 Environment: ${process.env.NODE_ENV || "development"}
-📊 Port: ${PORT}
-🔗 URL: http://localhost:${PORT}
-📚 Docs: http://localhost:${PORT}/api/docs
-❤️  Health: http://localhost:${PORT}/health
+CipherStudio API Server is running!
+Environment: ${process.env.NODE_ENV || "development"}
+Port: ${PORT}
+URL: http://localhost:${PORT}
+Health: http://localhost:${PORT}/health
   `);
 });
 
@@ -213,17 +159,13 @@ process.on("uncaughtException", (err) => {
 
 // Graceful shutdown
 process.on("SIGTERM", () => {
-  console.log("SIGTERM received. Shutting down gracefully...");
   server.close(() => {
-    console.log("Process terminated");
     process.exit(0);
   });
 });
 
 process.on("SIGINT", () => {
-  console.log("SIGINT received. Shutting down gracefully...");
   server.close(() => {
-    console.log("Process terminated");
     process.exit(0);
   });
 });

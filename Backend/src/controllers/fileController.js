@@ -90,7 +90,6 @@ const createFile = asyncHandler(async (req, res) => {
 // @access  Private
 const getFileById = asyncHandler(async (req, res) => {
   const file = await File.findById(req.params.id).populate("projectId");
-  console.log("file is ", file);
 
   if (!file) {
     return res.status(404).json({
@@ -289,9 +288,6 @@ const deleteFile = asyncHandler(async (req, res) => {
 // @route   GET /api/files/project/:projectId/tree
 // @access  Public (if project is public) / Private (if project is private)
 const getProjectFileTree = asyncHandler(async (req, res) => {
-  console.log("Getting file tree for project:", req.params.projectId);
-  console.log("User:", req.user?.email || "Anonymous");
-
   const { projectId } = req.params;
 
   // Check if project exists
@@ -322,7 +318,6 @@ const getProjectFileTree = asyncHandler(async (req, res) => {
   }
 
   const fileTree = await File.buildFileTree(projectId);
-  console.log("File tree built:", fileTree?.length || 0, "files");
 
   res.status(200).json({
     success: true,
@@ -370,7 +365,6 @@ const moveFile = asyncHandler(async (req, res) => {
 // @route   GET /api/files/project/:projectId/search
 // @access  Private
 const searchFiles = asyncHandler(async (req, res) => {
-  console.log("coming");
   const { projectId } = req.params;
   const { q: query, type, limit = 50 } = req.query;
 
@@ -484,14 +478,10 @@ const bulkUpdateFiles = asyncHandler(async (req, res) => {
     errors: [],
   };
 
-  console.log(`Processing ${files.length} files for project ${projectId}`);
-
   // Process each file
   for (const fileData of files) {
     try {
       const { path, content, name, type = "file", language } = fileData;
-
-      console.log(`Processing file: ${path} (${name})`);
 
       if (!path || !name) {
         console.warn(`Skipping file with missing path or name:`, fileData);
@@ -507,7 +497,6 @@ const bulkUpdateFiles = asyncHandler(async (req, res) => {
 
       if (existingFile) {
         // Update existing file
-        console.log(`Updating existing file: ${path}`);
         existingFile.content = content || "";
         existingFile.lastModified = new Date();
         if (language) existingFile.language = language;
@@ -520,7 +509,6 @@ const bulkUpdateFiles = asyncHandler(async (req, res) => {
         });
       } else {
         // Create new file
-        console.log(`Creating new file: ${path}`);
         const newFile = new File({
           name,
           projectId,
@@ -538,9 +526,6 @@ const bulkUpdateFiles = asyncHandler(async (req, res) => {
           path: newFile.path,
           name: newFile.name,
         });
-        console.log(
-          `Successfully created file: ${path} with ID: ${newFile._id}`
-        );
       }
     } catch (error) {
       console.error(`Error processing file ${fileData.path}:`, error);

@@ -15,24 +15,17 @@ export default function useProject(initialProjectId = "default") {
   const [error, setError] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Convert backend file structure to frontend format
   const convertBackendFiles = useCallback((backendFiles) => {
-    console.log("Converting backend files:", backendFiles);
     const frontendFiles = {};
 
-    // Recursive function to traverse the tree structure
     const traverseTree = (items) => {
       if (!Array.isArray(items)) return;
 
       items.forEach((item) => {
         if (item.type === "file" && item.path && item.content !== undefined) {
-          // Ensure path starts with / for frontend compatibility
           const normalizedPath = item.path.startsWith("/")
             ? item.path
             : `/${item.path}`;
-          console.log(
-            `Adding file: ${normalizedPath} with content length: ${item.content.length}`
-          );
           frontendFiles[normalizedPath] = item.content;
         } else if (item.type === "folder" && item.children) {
           // Recursively process children
@@ -46,7 +39,6 @@ export default function useProject(initialProjectId = "default") {
       traverseTree(backendFiles);
     }
 
-    console.log("Converted frontend files:", frontendFiles);
     return Object.keys(frontendFiles).length > 0
       ? frontendFiles
       : DEFAULT_FILES;
@@ -94,15 +86,10 @@ export default function useProject(initialProjectId = "default") {
             const projectResponse = await projectsApi.getById(projectIdValue);
             const filesResponse = await filesApi.getProjectTree(projectIdValue);
 
-            console.log("Project response:", projectResponse);
-            console.log("Files response:", filesResponse);
-
             setProject(projectResponse.data.project);
             const loadedFiles = convertBackendFiles(
               filesResponse.data.fileTree
             );
-            console.log("Final loaded files:", loadedFiles);
-            console.log("Available file paths:", Object.keys(loadedFiles));
 
             setFiles(loadedFiles);
             const firstFilePath = Object.keys(loadedFiles)[0] || "";

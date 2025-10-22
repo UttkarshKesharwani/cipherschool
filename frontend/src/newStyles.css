@@ -1,364 +1,59 @@
-/* Import auth styles */
-@import url("./styles/auth.css");
+/* 
+ * Main stylesheet - Refactored and organized
+ * 
+ * This file imports all component-specific stylesheets in the correct order
+ * and includes global styles that don't belong to specific components.
+ */
 
-/* Root layout */
-.app-root {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-color: var(--bg);
-  color: var(--text);
-  font-family: "Inter", "Segoe UI", sans-serif;
-  transition: background 0.3s, color 0.3s;
+/* Import all organized stylesheets */
+@import url("./styles/variables.css"); /* CSS custom properties and themes */
+@import url("./styles/layout.css"); /* Global layout and app structure */
+@import url("./styles/auth.css"); /* Authentication modal styles */
+@import url("./styles/explorer.css"); /* File explorer component */
+@import url("./styles/editor.css"); /* Code editor component */
+@import url("./styles/preview.css"); /* Preview panel component */
+@import url("./styles/topbar.css"); /* Top navigation bar */
+@import url("./styles/user-profile.css"); /* User profile component */
+@import url("./styles/project-list.css"); /* Project list component */
+@import url("./styles/utilities.css"); /* Utility classes */
+
+/* Global focus management for accessibility */
+*:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-/* Error banner */
-.error-banner {
-  background-color: #dc2626;
-  color: white;
-  padding: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-}
-
-.error-banner button {
-  background: #b91c1c;
-  border: 1px solid #991b1b;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.error-banner button:hover {
-  background: #991b1b;
-}
-
-/* Themes */
-:root {
-  --bg: #0f111a;
-  --bg-light: #ffffff;
-  --sidebar-bg: #1e1e1e;
-  --sidebar-border: #2d2d30;
-  --text: #cccccc;
-  --border: #2d2d30;
-  --hover: #2a2d2e;
-  --accent: #007acc;
-}
-
-[data-theme="light"] {
-  --bg: #f9f9f9;
-  --text: #111;
-  --sidebar-bg: #ffffff;
-  --border: #ddd;
-  --hover: #f0f0f0;
-  --accent: #0077cc;
-}
-
-/* Workspace */
-.workspace {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-/* File Explorer Styling */
-.file-explorer.vscode-like {
-  width: 240px;
-  background: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
-  padding: 0;
-  overflow-y: auto;
-  transition: width 0.3s ease;
-  color: var(--text);
-}
-
-/* File Explorer Header */
-.fe-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: var(--sidebar-bg);
-  border-bottom: 1px solid var(--sidebar-border);
-  font-weight: 600;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text);
-}
-
-.fe-header-actions {
-  display: flex;
-  gap: 4px;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  padding: 4px;
-  border-radius: 4px;
-  cursor: pointer;
-  color: var(--text);
-  opacity: 0.7;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-btn:hover {
-  background: var(--hover);
-  opacity: 1;
-}
-
-/* File Explorer Tree */
-.fe-tree {
-  padding: 4px 0;
-}
-
-.fe-node {
-  position: relative;
-  user-select: none;
-}
-
-.fe-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 22px;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.fe-row:hover {
-  background: var(--hover);
-}
-
-.fe-node.active .fe-row {
-  background: var(--accent);
-  color: white;
-}
-
-.fe-label {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  padding: 2px 4px;
-  font-size: 13px;
-  color: var(--text);
-  outline: none;
-  min-height: 22px;
-}
-
-.fe-node.active .fe-label {
-  color: white;
-}
-
-/* Icons */
-.fe-icon {
-  width: 16px;
-  height: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 4px;
-  font-size: 10px;
-  font-family: monospace;
-  color: var(--text);
-}
-
-.fe-node.active .fe-icon {
-  color: white;
-}
-
-.chevron {
-  transition: transform 0.15s ease;
-  cursor: pointer;
-}
-
-.chevron.open {
-  transform: rotate(90deg);
-}
-
-.file-spacer {
-  width: 16px;
-  height: 16px;
-}
-
-/* File names */
-.fe-name {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 13px;
-  color: inherit;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Children indentation */
-.fe-children {
-  position: relative;
-}
-
-/* Rename input */
-.fe-rename {
-  padding: 2px 4px;
-  margin: 1px 0;
-}
-
-.fe-rename input {
-  width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--accent);
-  color: var(--text);
-  padding: 2px 4px;
-  font-size: 13px;
-  font-family: inherit;
-  border-radius: 2px;
+*:focus:not(:focus-visible) {
   outline: none;
 }
 
-.fe-rename input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-/* Dark mode specific improvements */
-[data-theme="light"] .fe-header {
-  background: #f8f8f8;
-  border-bottom: 1px solid #e5e5e5;
-  color: #424242;
-}
-
-[data-theme="light"] .icon-btn {
-  color: #424242;
-}
-
-[data-theme="light"] .icon-btn:hover {
-  background: #e8e8e8;
-}
-
-[data-theme="light"] .fe-row:hover {
-  background: #f0f0f0;
-}
-
-[data-theme="light"] .fe-node.active .fe-row {
-  background: #0078d4;
-}
-
-[data-theme="light"] .fe-rename input {
-  background: white;
-  border: 1px solid #0078d4;
-  color: #424242;
-}
-
-/* Scrollbar styling for file explorer */
-.file-explorer::-webkit-scrollbar {
-  width: 8px;
-}
-
-.file-explorer::-webkit-scrollbar-track {
-  background: var(--sidebar-bg);
-}
-
-.file-explorer::-webkit-scrollbar-thumb {
-  background: var(--hover);
-  border-radius: 4px;
-}
-
-.file-explorer::-webkit-scrollbar-thumb:hover {
-  background: var(--border);
-}
-
-/* Sidebar */
-.file-explorer {
-  width: 240px;
-  background: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
-  padding: 0.75rem;
-  overflow-y: auto;
-  transition: width 0.3s ease;
-}
-
-/* Editor + Preview Container */
-.editor-preview {
-  display: flex;
-  flex: 1;
-  height: 100%;
-  background: var(--bg);
-  transition: all 0.3s ease;
-}
-
-/* Equal Split */
-.editor-container,
-.preview-container {
-  flex: 1;
-  height: 100%;
-  overflow: hidden;
-  border-left: 1px solid var(--border);
-}
-
-/* Sandpack Layout */
-.preview-layout {
-  height: 100%;
-  border-left: 1px solid var(--border);
-}
-
-/* No File Selected */
-/* .no-file {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  color: #aaa;
-  font-size: 1.1rem;
-  font-style: italic;
-  background: #14161f;
-} */
-
-/* Scrollbars */
-.file-explorer::-webkit-scrollbar {
-  width: 8px;
-}
-
-.file-explorer::-webkit-scrollbar-track {
-  background: var(--sidebar-bg);
-}
-
-.file-explorer::-webkit-scrollbar-thumb {
-  background: var(--hover);
-  border-radius: 4px;
-}
-
-.file-explorer::-webkit-scrollbar-thumb:hover {
-  background: var(--border);
-}
-
-/* Smooth transitions */
-.editor-container,
-.preview-container,
-.file-explorer {
-  transition: all 0.3s ease;
-}
-
-/* Hover & Active States for FileExplorer items (optional) */
-.file-item:hover {
-  background: var(--hover);
-  cursor: pointer;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1000px) {
-  .editor-preview {
-    flex-direction: column;
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: #fff;
+    --text: #fff;
+    --bg: #000;
   }
 
-  .editor-container,
-  .preview-container {
-    height: 50%;
-    width: 100%;
+  [data-theme="light"] {
+    --border: #000;
+    --text: #000;
+    --bg: #fff;
+  }
+}
+
+/* Reduced motion support for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

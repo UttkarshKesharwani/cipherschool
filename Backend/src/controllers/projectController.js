@@ -213,10 +213,6 @@ const createProject = asyncHandler(async (req, res) => {
   // Create files - prioritize files from frontend, fallback to template
   if (files && files.length > 0) {
     // Use files sent from frontend
-    console.log(
-      `Creating ${files.length} files from frontend for project ${project._id}`
-    );
-
     for (const fileData of files) {
       try {
         const { path, content, name, type = "file", language } = fileData;
@@ -238,7 +234,6 @@ const createProject = asyncHandler(async (req, res) => {
         });
 
         await file.save();
-        console.log(`Created file: ${path}`);
       } catch (error) {
         console.error(`Error creating file ${fileData.path}:`, error);
       }

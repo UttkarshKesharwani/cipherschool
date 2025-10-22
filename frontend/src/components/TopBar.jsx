@@ -13,7 +13,6 @@ export default function TopBar({
   onShowProjectList,
   autosave,
   setAutosave,
-  onAddFile,
   theme,
   setTheme,
   isSaving,
@@ -33,10 +32,7 @@ export default function TopBar({
   useEffect(() => {
     const urlProjectId = searchParams.get("projectId");
 
-    // Only update URL if projectId changes and is different from URL
-    // Don't sync from URL back to projectId - that's handled by App.jsx
     if (projectId && projectId !== "default" && projectId !== urlProjectId) {
-      console.log("TopBar: Updating URL with projectId:", projectId);
       setSearchParams((prev) => {
         const newParams = new URLSearchParams(prev);
         newParams.set("projectId", projectId);
@@ -97,11 +93,7 @@ export default function TopBar({
       try {
         const newProject = await onCreateProject(name, description);
         setShowNewProjectModal(false);
-
-        // The URL update and project loading is now handled by handleCreateProject
-        console.log("Project creation completed:", newProject?._id);
       } catch (error) {
-        console.error("Failed to create project:", error);
         alert("Failed to create project: " + error.message);
         setShowNewProjectModal(false);
       }
@@ -134,24 +126,6 @@ export default function TopBar({
           </button>
           <button onClick={onShowProjectList}>📁 My Projects</button>
           <button onClick={handleCreateProject}>+ New Project</button>
-          {projectId && projectId !== "default" && (
-            <button
-              onClick={() => {
-                const url = `${window.location.origin}${window.location.pathname}?projectId=${projectId}`;
-                navigator.clipboard
-                  .writeText(url)
-                  .then(() => {
-                    alert("Shareable URL copied to clipboard!");
-                  })
-                  .catch(() => {
-                    alert(`Shareable URL: ${url}`);
-                  });
-              }}
-              title="Copy shareable URL"
-            >
-              🔗 Share
-            </button>
-          )}
           <label className="autosave">
             <input
               type="checkbox"
@@ -162,7 +136,6 @@ export default function TopBar({
           </label>
         </div>
         <div className="right">
-          <button onClick={onAddFile}>+ New File</button>
           <button
             className="theme"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
